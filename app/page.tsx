@@ -26,6 +26,7 @@ const STATUSES = [
 
 export default function Page() {
   const [items, setItems] = useState<OrderItem[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -71,6 +72,12 @@ customer_email
       .eq("id", itemId);
 
     loadOrders();
+  }
+  function openOrder(orderId: number) {
+    const order = items.find((i) => i.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+    }
   }
 
   const grouped: Record<string, OrderItem[]> = {};
@@ -139,7 +146,7 @@ customer_email
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className="min-h-[580px] border-r border-slate-700/60 last:border-r-0"
+                  className="min-h-[120px] border-r border-slate-700/60 last:border-r-0"
                 >
                   {/* COLUMN HEADER */}
 
@@ -161,12 +168,34 @@ customer_email
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition-all duration-150${
-                              snapshot.isDragging
-                                ? "shadow-2xl scale-[1.02]"
-                                : "shadow-md hover:shadow-x1 hover:-translate-y-[1px]"
-                            }`}
+                            onClick={() => openOrder(item.id)}
+                            className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition
+${
+  snapshot.isDragging
+    ? "shadow-2xl scale-[1.02]"
+    : "shadow-md hover:shadow-xl hover:-translate-y-[1px]"
+}
+`}
                           >
+                            <div
+                              className={`absolute left-0 top-0 h-full w-1 rounded-l ${
+                                item.status === "NEW"
+                                  ? "bg-orange-700"
+                                  : item.status === "GARMENT_ORDERED"
+                                    ? "bg-blue-700"
+                                    : item.status === "SENT_TO_PRINTER"
+                                      ? "bg-grey-700"
+                                      : item.status === "WITH_PRINTER"
+                                        ? "bg-indigo-700"
+                                        : item.status === "LEFT_PRINTER"
+                                          ? "bg-pink-700"
+                                          : item.status === "QA"
+                                            ? "bg-green-500"
+                                            : item.status === "SHIPPED"
+                                              ? "bg-gray-500"
+                                              : "bg-orange-500"
+                              }`}
+                            ></div>
                             {/* CARD CONTENT */}
 
                             <div className="text-[13px] font-semibold text-white">
@@ -197,6 +226,44 @@ customer_email
           ))}
         </div>
       </DragDropContext>
+      {selectedOrder && (
+        <div className="fixed right-0 top-0 h-full w-[420px] bg-slate-900 border-l border-slate-700 shadow-2xl z-50">
+          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
+            <div className="text-sm font-semibold text-white">
+              Order #{selectedOrder.id}
+            </div>
+
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="text-slate-400 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-4 space-y-3 text-sm">
+            <div className="text-slate-300">
+              <span className="text-slate-500">Product:</span>{" "}
+              {selectedOrder.product_name}
+            </div>
+
+            <div className="text-slate-300">
+              <span className="text-slate-500">Customer:</span>{" "}
+              {selectedOrder.orders?.customer_name}
+            </div>
+
+            <div className="text-slate-300">
+              <span className="text-slate-500">Email:</span>{" "}
+              {selectedOrder.orders?.customer_email}
+            </div>
+
+            <div className="text-slate-300">
+              <span className="text-slate-500">Status:</span>{" "}
+              {selectedOrder.status}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
