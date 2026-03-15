@@ -225,11 +225,13 @@ ${
           ))}
         </div>
       </DragDropContext>
-      {selectedOrder && (
-        <div className="fixed right-0 top-0 h-full w-[420px] bg-slate-900 border-l border-slate-700 shadow-2xl z-50">
+      <div>
+        <div
+          className={`fixed right-0 top-0 h-full w-[420px] bg-slate-900 border-slate-700 shadow-2x1 transform transition-transform duration-300 ease-in-out ${selectedOrder ? "translate-x-0" : "translate-x-full"}`}
+        >
           <div className="p-4 border-b border-slate-700 flex justify-between items-center">
             <div className="text-sm font-semibold text-white">
-              Order #{selectedOrder.id}
+              Order #{selectedOrder?.id}
             </div>
 
             <button
@@ -243,26 +245,26 @@ ${
           <div className="p-4 space-y-3 text-sm">
             <div className="text-slate-300">
               <span className="text-slate-500">Product:</span>{" "}
-              {selectedOrder.product_name}
+              {selectedOrder?.product_name}
             </div>
 
             <div className="text-slate-300">
               <span className="text-slate-500">Customer:</span>{" "}
-              {selectedOrder.orders?.customer_name}
+              {selectedOrder?.orders?.customer_name}
             </div>
 
             <div className="text-slate-300">
               <span className="text-slate-500">Email:</span>{" "}
-              {selectedOrder.orders?.customer_email}
+              {selectedOrder?.orders?.customer_email}
             </div>
 
             <div className="text-slate-300">
               <span className="text-slate-500">Status:</span>{" "}
-              {selectedOrder.status}
+              {selectedOrder?.status}
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
