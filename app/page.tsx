@@ -167,7 +167,6 @@ customer_email
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            {...provided.dragHandleProps}
                             onClick={() => openOrder(item.id)}
                             className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition
 ${
@@ -177,28 +176,28 @@ ${
 }
 `}
                           >
-                            <div
-                              className={`absolute left-0 top-0 h-full w-1 rounded-l ${
-                                item.status === "NEW"
-                                  ? "bg-orange-700"
-                                  : item.status === "GARMENT_ORDERED"
-                                    ? "bg-blue-700"
-                                    : item.status === "SENT_TO_PRINTER"
-                                      ? "bg-grey-700"
-                                      : item.status === "WITH_PRINTER"
-                                        ? "bg-indigo-700"
-                                        : item.status === "LEFT_PRINTER"
-                                          ? "bg-pink-700"
-                                          : item.status === "QA"
-                                            ? "bg-green-500"
-                                            : item.status === "SHIPPED"
-                                              ? "bg-gray-500"
-                                              : "bg-orange-500"
-                              }`}
-                            ></div>
                             {/* CARD CONTENT */}
 
-                            <div className="text-[13px] font-semibold text-white">
+                            <div
+                              {...provided.dragHandleProps}
+                              className={`px-2 py-1 text-[12px] font-semibold text-white rounded-t cursor-grab ${
+                                item.status === "NEW"
+                                  ? "bg-blue-600"
+                                  : item.status === "GARMENT_ORDERED"
+                                    ? "bg-amber-600"
+                                    : item.status === "SENT_TO_PRINTER"
+                                      ? "bg-purple-600"
+                                      : item.status === "WITH_PRINTER"
+                                        ? "bg-indigo-600"
+                                        : item.status === "LEFT_PRINTER"
+                                          ? "bg-pink-600"
+                                          : item.status === "QA"
+                                            ? "bg-green-600"
+                                            : item.status === "SHIPPED"
+                                              ? "bg-gray-600"
+                                              : "bg-slate-600"
+                              }`}
+                            >
                               Order #{item.id}
                             </div>
 
