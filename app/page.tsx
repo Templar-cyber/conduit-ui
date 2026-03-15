@@ -57,6 +57,14 @@ customer_email
     const itemId = result.draggableId;
     const newStatus = result.destination.droppableId;
 
+    // update UI immediately
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id.toString() === itemId ? { ...item, status: newStatus } : item,
+      ),
+    );
+
+    // then update database
     await supabase
       .from("order_items")
       .update({ status: newStatus })
