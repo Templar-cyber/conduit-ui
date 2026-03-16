@@ -140,7 +140,7 @@ customer_email
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div
-          className={`grid grid-cols-7 gap-3 border border-slate-700/60 transition-all duration-200 ${selectedOrder ? "opacity-30" : ""}`}
+          className={`grid grid-cols-7 gap-3 border border-slate-700/60 transition-all duration-200`}
         >
           {STATUSES.map((status) => (
             <Droppable key={status.key} droppableId={status.key}>
@@ -164,6 +164,7 @@ customer_email
                         key={item.id}
                         draggableId={String(item.id)}
                         index={index}
+                        isDragDisabled={!!selectedOrder}
                       >
                         {(provided, snapshot) => (
                           <div
@@ -176,19 +177,23 @@ customer_email
                                 openOrder(item.id);
                               }
                             }}
-                            className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition
-${
-  snapshot.isDragging
-    ? "shadow-2xl scale-[1.02]"
-    : "shadow-md hover:shadow-xl hover:-translate-y-[1px]"
-}
-`}
+                            className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition select-none ${
+                              selectedOrder
+                                ? selectedOrder.id === item.id
+                                  ? "opacity-100 z-50"
+                                  : "opacity-30 hover:opacity-50 hover:brightness-110 hover:-translate-y-[2px]"
+                                : "opacity-100 hover:brightness-110 hover:-translate-y-[2px]"
+                            }`}
                           >
                             {/* CARD CONTENT */}
 
                             <div
                               {...provided.dragHandleProps}
-                              className={`px-2 py-1 text-[12px] font-semibold text-white rounded-t cursor-grab ${
+                              className={`px-2 py-1 text-[12px] font-semibold text-white rounded-t ${
+                                selectedOrder
+                                  ? "cursor-not-allowed"
+                                  : "cursor-grab"
+                              } ${
                                 item.status === "NEW"
                                   ? "bg-blue-600"
                                   : item.status === "GARMENT_ORDERED"
