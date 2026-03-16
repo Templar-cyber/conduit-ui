@@ -139,7 +139,9 @@ customer_email
       {/* WORKFLOW BOARD */}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-7 gap-3 border border-slate-700/60">
+        <div
+          className={`grid grid-cols-7 gap-3 border border-slate-700/60 transition-all duration-200 ${selectedOrder ? "opacity-30" : ""}`}
+        >
           {STATUSES.map((status) => (
             <Droppable key={status.key} droppableId={status.key}>
               {(provided) => (
@@ -167,7 +169,13 @@ customer_email
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            onClick={() => openOrder(item.id)}
+                            onClick={() => {
+                              if (selectedOrder?.id === item.id) {
+                                setSelectedOrder(null);
+                              } else {
+                                openOrder(item.id);
+                              }
+                            }}
                             className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 transition
 ${
   snapshot.isDragging
