@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { supabase } from "../lib/supabase";
+import SidePanel from "@/components/SidePanel";
 
 type OrderItem = {
   id: number;
