@@ -170,11 +170,10 @@ customer_email
                         {(provided, snapshot) => {
                           const cardState =
                             selectedOrder?.id === item.id
-                              ? "opacity-100 z-50"
+                              ? "opacity-100 z-50 ring-1 ring-slate-700 shadow-xl"
                               : selectedOrder
-                                ? "opacity-30 hover:opacity-50 hover:brightness-110 hover:-translate-y-[2px]"
+                                ? "opacity-30"
                                 : "opacity-100 hover:brightness-110 hover:-translate-y-[3px]";
-
                           return (
                             <div
                               ref={provided.innerRef}
@@ -186,13 +185,13 @@ customer_email
                                   openOrder(item.id);
                                 }
                               }}
-                              className={`relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 rounded-md ${cardState}`}
+                              className={`select-none relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 rounded-md ${cardState}`}
                             >
                               {/* CARD CONTENT */}
 
                               <div
                                 {...provided.dragHandleProps}
-                                className={`px-2 py-1 text-[12px] font-semibold text-white rounded-t ${
+                                className={`px-2 py-1 text-[12px] font-semibold text-white ${selectedOrder ? "cursor-not-allowed" : "cursor-grab"} ${
                                   selectedOrder
                                     ? "cursor-not-allowed"
                                     : "cursor-grab"
@@ -214,14 +213,10 @@ customer_email
                                                 : "bg-slate-600"
                                 }`}
                               >
-                                {item.status}
+                                Order #{item.id}
                               </div>
 
                               <div className="px-2 py-2 text-sm text-slate-200 space-y-1">
-                                <div className="font-medium">
-                                  Order #{item.id}
-                                </div>
-
                                 <div className="text-xs text-slate-300">
                                   {item.product_name}
                                 </div>
@@ -249,8 +244,19 @@ customer_email
         </div>
       </DragDropContext>
       <div>
+        {selectedOrder && (
+          <div
+            onClick={() => setSelectedOrder(null)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+          />
+        )}
         <div
-          className={`fixed right-0 top-0 h-full w-[420px] bg-slate-900 border-slate-700 shadow-2x1 transform transition-transform duration-300 ease-in-out ${selectedOrder ? "translate-x-0" : "translate-x-full"}`}
+          className={`fixed right-0 top-0 h-full w-[520px] bg-slate-900
+border-l border-slate-700/60
+shadow-[-12px_0_30px_rgba(0,0,0,0.6)]
+transform transition-transform duration-300 ${
+            selectedOrder ? "translate-x-0" : "translate-x-full"
+          } z-50`}
         >
           <div className="p-4 border-b border-slate-700 flex justify-between items-center">
             <div className="text-sm font-semibold text-white">
