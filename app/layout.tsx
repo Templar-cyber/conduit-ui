@@ -1,3 +1,5 @@
+"use Client";
+
 import {
   LayoutDashboard,
   Workflow,
@@ -18,44 +20,24 @@ const inter = Inter({
 
 function MenuIcon({
   children,
-  active = false,
+  href,
 }: {
   children: React.ReactNode;
-  active?: boolean;
+  href: string;
 }) {
   return (
-    <div
-      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
-        active
-          ? "bg-orange-500/15 text-white"
-          : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
-      }`}
+    <a
+      href={href}
+      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/60 hover:text-white"
     >
       {children}
-    </div>
+    </a>
   );
 }
-
-function DotIcon() {
-  return <div className="h-4 w-4 rounded-sm bg-slate-500/60" />;
-}
-
 function LogoMark() {
   return (
-    <div className="flex items-center gap-3 px-3 py-4">
-      {/* Logo Symbol */}
-      <div className="relative h-7 w-7">
-        {/* Backward C */}
-        <div className="absolute inset-0 rounded-full border-[3px] border-orange-500 border-r-transparent"></div>
-
-        {/* Vertical stroke */}
-        <div className="absolute left-[9px] top-[6px] h-[12px] w-[3px] bg-orange-500 rounded"></div>
-      </div>
-
-      {/* Logo Text */}
-      <span className="text-[18px] font-semibold tracking-[0.16em] text-white">
-        CONDUIT
-      </span>
+    <div className="flex items-center px-4 py-6">
+      <img src="/conduit-logo.png" className="h-8 w-auto opacity-90" />
     </div>
   );
 }
@@ -69,51 +51,49 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen bg-[#0b1220] text-white antialiased`}
       >
-        <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,#182235_0%,#0f172a_32%,#0b1220_100%)]">
+        <div className="flex min-h-screen">
           <aside className="w-[255px] border-r border-slate-700/60 bg-[#0b1220]/95">
+            {/* Logo */}
             <div className="border-b border-slate-700/60 px-6 py-6">
-              <div className="flex items-center gap-3">
-                <LogoMark />
-              </div>
+              <LogoMark />
             </div>
 
-            <nav className="px-4 py-5">
-              <div className="space-y-2">
-                <MenuIcon active>
-                  <LayoutDashboard size={20} />
-                  Dashboard
-                </MenuIcon>
+            {/* Nav */}
+            <nav className="px-4 py-5 space-y-2">
+              <MenuIcon href="/">
+                <LayoutDashboard size={20} />
+                Dashboard
+              </MenuIcon>
 
-                <MenuIcon>
-                  <Workflow size={20} />
-                  Workflow
-                </MenuIcon>
+              <MenuIcon href="/workflow">
+                <Workflow size={20} />
+                Workflow
+              </MenuIcon>
 
-                <MenuIcon>
-                  <Package size={20} />
-                  Products
-                </MenuIcon>
+              <MenuIcon href="/products">
+                <Package size={20} />
+                Products
+              </MenuIcon>
 
-                <MenuIcon>
-                  <Truck size={20} />
-                  Suppliers
-                </MenuIcon>
+              <MenuIcon href="/suppliers">
+                <Truck size={20} />
+                Suppliers
+              </MenuIcon>
 
-                <MenuIcon>
-                  <Boxes size={20} />
-                  Inventory
-                </MenuIcon>
+              <MenuIcon href="/inventory">
+                <Boxes size={20} />
+                Inventory
+              </MenuIcon>
 
-                <MenuIcon>
-                  <BarChart3 size={20} />
-                  Analytics
-                </MenuIcon>
+              <MenuIcon href="/analytics">
+                <BarChart3 size={20} />
+                Analytics
+              </MenuIcon>
 
-                <MenuIcon>
-                  <Settings size={20} />
-                  Settings
-                </MenuIcon>
-              </div>
+              <MenuIcon href="/settings">
+                <Settings size={20} />
+                Settings
+              </MenuIcon>
             </nav>
           </aside>
 
