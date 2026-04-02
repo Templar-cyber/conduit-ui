@@ -22,6 +22,7 @@ export default function Page() {
   const [selectedOrder, setSelectedOrder] = useState<OrderItem | null>(null);
   const [noteInput, setNoteInput] = useState("");
   const [noteAdded, setNoteAdded] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadOrders();
@@ -102,8 +103,16 @@ size
   STATUSES.forEach((s) => {
     grouped[s.key] = [];
   });
+  const filteredItems = items.filter((item) => {
+    const search = searchTerm.toLowerCase();
 
-  items.forEach((item) => {
+    return (
+      item.product_name?.toLowerCase().includes(search) ||
+      item.orders?.customer_name?.toLowerCase().includes(search) ||
+      String(item.id).includes(search)
+    );
+  });
+  filteredItems.forEach((item) => {
     console.log("ITEM STATUS:", item.status);
     if (grouped[item.status]) {
       grouped[item.status].push(item);
@@ -125,149 +134,156 @@ size
 
   return (
     <>
-      <div className="flex-1 px-7 py-7">
-        {/* PAGE TITLE */}
-
-        <h1 className="mb-6 text-[20px] font-semibold tracking-tight text-white">
+      <div className="mt-6 mb-6 flex items-center justify-between w-full pl-5 pr-1 pl-5 pr-4">
+        <h1 className="text-[20px] font-semibold tracking-tight text-white">
           CONDUIT Workflow
         </h1>
 
-        {/* SUMMARY ROW */}
-
-        <SummaryBar items={items} />
-
-        {/* WORKFLOW BOARD */}
-
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div
-            className={`grid grid-cols-7 gap-3 border border-slate-700/60 transition-all duration-200`}
-          >
-            {STATUSES.map((status) => (
-              <Droppable key={status.key} droppableId={status.key}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="min-h-[120px] border-r border-slate-700/60 last:border-r-0"
-                  >
-                    {/* COLUMN HEADER */}
-
-                    <div className="border-b border-slate-700/60 px-3 py-2 text-[13px] text-slate-300">
-                      {status.label}
-                    </div>
-
-                    {/* CARDS */}
-
-                    <div className="px-2 py-2">
-                      {grouped[status.key].map((item, index) => (
-                        <Draggable
-                          key={item.id}
-                          draggableId={String(item.id)}
-                          index={index}
-                          isDragDisabled={!!selectedOrder}
-                        >
-                          {(provided, snapshot) => {
-                            const cardState =
-                              selectedOrder?.id === item.id
-                                ? "opacity-100 z-50 ring-1 ring-slate-700 shadow-xl"
-                                : selectedOrder
-                                  ? "opacity-30"
-                                  : "opacity-100 hover:brightness-110 hover:-translate-y-[3px]";
-                            return (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                onClick={() => {
-                                  if (selectedOrder?.id === item.id) {
-                                    setSelectedOrder(null);
-                                  } else {
-                                    openOrder(item.id);
-                                  }
-                                }}
-                                className={`select-none relative mb-2 border border-slate-700 bg-slate-800 px-2 py-2 rounded-md ${cardState}`}
-                              >
-                                {/* CARD CONTENT */}
-
-                                <div
-                                  {...provided.dragHandleProps}
-                                  className={`px-2 py-1 text-[12px] font-semibold text-white ${selectedOrder ? "cursor-not-allowed" : "cursor-grab"} ${
-                                    selectedOrder
-                                      ? "cursor-not-allowed"
-                                      : "cursor-grab"
-                                  } ${
-                                    item.status === "NEW"
-                                      ? "bg-blue-600"
-                                      : item.status === "GARMENT_ORDERED"
-                                        ? "bg-amber-600"
-                                        : item.status === "SENT_TO_PRINTER"
-                                          ? "bg-purple-600"
-                                          : item.status === "WITH_PRINTER"
-                                            ? "bg-indigo-600"
-                                            : item.status === "LEFT_PRINTER"
-                                              ? "bg-pink-600"
-                                              : item.status === "QA"
-                                                ? "bg-green-600"
-                                                : item.status === "SHIPPED"
-                                                  ? "bg-gray-600"
-                                                  : "bg-slate-600"
-                                  }`}
-                                >
-                                  Order #{item.id}
-                                </div>
-
-                                <div className="px-3 py-2 text-sm text-slate-200 space-y-1">
-                                  {/* Order ID */}
-
-                                  {/* Product */}
-                                  <div className="text-sm font-medium text-white leading-tight">
-                                    {item.product_name}
-                                  </div>
-
-                                  {/* Customer */}
-                                  <div className="text-sm text-slate-400">
-                                    {item.orders?.customer_name || "No name"}
-                                  </div>
-
-                                  {/* Date */}
-                                  <div className="text-[12px] text-slate-500">
-                                    {item.orders?.created_at
-                                      ? new Date(
-                                          item.orders.created_at,
-                                        ).toLocaleDateString("en-GB", {
-                                          day: "2-digit",
-                                          month: "short",
-                                        })
-                                      : ""}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          }}
-                        </Draggable>
-                      ))}
-
-                      {provided.placeholder}
-                    </div>
-                  </div>
-                )}
-              </Droppable>
-            ))}
-          </div>
-        </DragDropContext>
-        <div>
-          {false && (
-            <div
-              onClick={() => setSelectedOrder(null)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none"
-            />
-          )}
-        </div>
+        <input
+          type="text"
+          placeholder="Search orders..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="relative -top-0.35 mr-3 w-[220px] rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/30 focus:border-white/30 transition"
+        />
       </div>
 
-      <SidePanel
-        selectedOrder={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
-      />
+      {/* SUMMARY ROW */}
+      <div className="pl-5 pr-4 mb-4">
+        <SummaryBar items={filteredItems} />
+      </div>
+
+      {/* WORKFLOW BOARD */}
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div
+          className={`grid grid-cols-7 gap-3 border border-slate-700/60 transition-all duration-200`}
+        >
+          {STATUSES.map((status) => (
+            <Droppable key={status.key} droppableId={status.key}>
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="min-h-[120px] border-r border-slate-700/60 last:border-r-0"
+                >
+                  {/* COLUMN HEADER */}
+
+                  <div className="">{status.label}</div>
+
+                  {/* CARDS */}
+
+                  <div className="px-2 py-2">
+                    {grouped[status.key].map((item, index) => (
+                      <Draggable
+                        key={item.id}
+                        draggableId={String(item.id)}
+                        index={index}
+                        isDragDisabled={!!selectedOrder}
+                      >
+                        {(provided, snapshot) => {
+                          const cardState =
+                            selectedOrder?.id === item.id
+                              ? "opacity-100 z-50 ring-1 ring-slate-700 shadow-xl"
+                              : selectedOrder
+                                ? "opacity-30"
+                                : "opacity-100 hover:brightness-110 hover:-translate-y-[3px]";
+                          return (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              onClick={() => {
+                                if (selectedOrder?.id === item.id) {
+                                  setSelectedOrder(null);
+                                } else {
+                                  openOrder(item.id);
+                                }
+                              }}
+                              className={`select-none relative mb-2 bg-slate-800 px-2 py-2 rounded-md ${cardState}`}
+                            >
+                              {/* CARD CONTENT */}
+
+                              <div
+                                {...provided.dragHandleProps}
+                                className={`px-2 py-1 text-[12px] font-semibold text-white ${selectedOrder ? "cursor-not-allowed" : "cursor-grab"} ${
+                                  selectedOrder
+                                    ? "cursor-not-allowed"
+                                    : "cursor-grab"
+                                } ${
+                                  item.status === "NEW"
+                                    ? "bg-blue-600"
+                                    : item.status === "GARMENT_ORDERED"
+                                      ? "bg-amber-600"
+                                      : item.status === "SENT_TO_PRINTER"
+                                        ? "bg-purple-600"
+                                        : item.status === "WITH_PRINTER"
+                                          ? "bg-indigo-600"
+                                          : item.status === "LEFT_PRINTER"
+                                            ? "bg-pink-600"
+                                            : item.status === "QA"
+                                              ? "bg-green-600"
+                                              : item.status === "SHIPPED"
+                                                ? "bg-gray-600"
+                                                : "bg-slate-600"
+                                }`}
+                              >
+                                Order #{item.id}
+                              </div>
+
+                              <div className="px-3 py-2 text-sm text-slate-200 space-y-1">
+                                {/* Order ID */}
+
+                                {/* Product */}
+                                <div className="text-sm font-medium text-white leading-tight">
+                                  {item.product_name}
+                                </div>
+
+                                {/* Customer */}
+                                <div className="text-sm text-slate-400">
+                                  {item.orders?.customer_name || "No name"}
+                                </div>
+
+                                {/* Date */}
+                                <div className="text-[12px] text-slate-500">
+                                  {item.orders?.created_at
+                                    ? new Date(
+                                        item.orders.created_at,
+                                      ).toLocaleDateString("en-GB", {
+                                        day: "2-digit",
+                                        month: "short",
+                                      })
+                                    : ""}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }}
+                      </Draggable>
+                    ))}
+
+                    {provided.placeholder}
+                  </div>
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
+      </DragDropContext>
+      <div>
+        {false && (
+          <div
+            onClick={() => setSelectedOrder(null)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 pointer-events-none"
+          />
+        )}
+      </div>
+
+      {selectedOrder && (
+        <SidePanel
+          selectedOrder={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </>
   );
 }
