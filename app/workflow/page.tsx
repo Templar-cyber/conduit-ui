@@ -134,18 +134,27 @@ size
 
   return (
     <>
-      <div className="mt-6 mb-6 flex items-center justify-between w-full pl-5 pr-1 pl-5 pr-4">
-        <h1 className="text-[20px] font-semibold tracking-tight text-white">
-          CONDUIT Workflow
-        </h1>
+      <div className="mt-6 mb-6 flex items-center w-full pl-5 pr-4">
+        {/* LEFT */}
+        <div className="flex-1">
+          <h1 className="text-[20px] font-semibold tracking-tight text-white">
+            CONDUIT Workflow
+          </h1>
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search orders..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="relative -top-0.35 mr-3 w-[220px] rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/30 focus:border-white/30 transition"
-        />
+        {/* CENTER */}
+        <div className="flex-1 flex justify-center">
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-[260px] rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/30"
+          />
+        </div>
+
+        {/* RIGHT SPACER */}
+        <div className="flex-1" />
       </div>
 
       {/* SUMMARY ROW */}
@@ -169,7 +178,9 @@ size
                 >
                   {/* COLUMN HEADER */}
 
-                  <div className="">{status.label}</div>
+                  <div className="text-center font-semibold tracking-wide py-2">
+                    {status.label}
+                  </div>
 
                   {/* CARDS */}
 
