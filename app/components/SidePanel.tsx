@@ -10,14 +10,92 @@ type Props = {
 };
 
 export default function SidePanel({ selectedOrder, onClose }: Props) {
+  console.log("SIDE PANEL LOADED");
+
   console.log("SELECTED ORDER FULL:", selectedOrder); //
-  if (!selectedOrder) return null;
+
   const [notes, setNotes] = useState<any[]>([]);
   const [noteInput, setNoteInput] = useState("");
   const [showAddNote, setShowAddNote] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [noteAdded, setNoteAdded] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
 
+  const getDuration = (currentEvent: any, nextEvent: any) => {
+    if (!nextEvent) return null;
+
+    const current = new Date(currentEvent.created_at).getTime();
+    const next = new Date(nextEvent.created_at).getTime();
+
+    const diff = Math.floor((current - next) / 1000);
+    const minutes = Math.floor(diff / 60);
+    const hours = Math.floor(minutes / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    }
+
+    return `${minutes}m`;
+  };
+  const getSLALevel = (durationStr: string | null) => {
+    if (!durationStr) return null;
+
+    let mins = 0;
+
+    if (durationStr.includes("h")) {
+      const parts = durationStr.split("h");
+      const hours = parseInt(parts[0]) || 0;
+      const minutes = parseInt(parts[1]) || 0;
+      mins = hours * 60 + minutes;
+    } else {
+      mins = parseInt(durationStr) || 0;
+    }
+
+    if (mins > 4320) return "problem";
+    if (mins > 2880) return "slow";
+    return "fast";
+  };
+  const rawDate = selectedOrder?.date || selectedOrder?.created_at;
+
+  const parsedDate = rawDate
+    ? rawDate.includes("/")
+      ? new Date(rawDate.split("/").reverse().join("-")) // FIX: DD/MM/YYYY
+      : new Date(rawDate)
+    : null;
+
+  const orderAgeMins = parsedDate
+    ? Math.floor((Date.now() - parsedDate.getTime()) / (1000 * 60))
+    : null;
+  console.log("RAW DATE:", rawDate);
+  console.log("PARSED DATE:", parsedDate);
+  console.log("AGE MINS:", orderAgeMins);
+  const orderSLA =
+    orderAgeMins && orderAgeMins > 7200 // 5 days
+      ? "problem"
+      : "ok";
+
+  const latestEvent = events[0];
+
+  const latestDuration = latestEvent
+    ? Math.floor(
+        (Date.now() - new Date(latestEvent.created_at).getTime()) / (1000 * 60),
+      )
+    : null;
+
+  const latestSLA = latestDuration ? getSLALevel(`${latestDuration}m`) : null;
+
+  const getSLAColor = (sla: string | null) => {
+    if (!sla) return "text-gray-400";
+    if (sla === "problem") return "text-red-500";
+    if (sla === "slow") return "text-yellow-400";
+    return "text-green-400";
+  };
+  const getStatusColor = (sla: string | null) => {
+    if (!sla) return "text-white";
+    if (sla === "problem") return "text-red-500";
+    if (sla === "slow") return "text-amber-400";
+    return "text-green-400";
+  };
   useEffect(() => {
     if (!selectedOrder) return;
 
@@ -32,8 +110,19 @@ export default function SidePanel({ selectedOrder, onClose }: Props) {
         setNotes(data);
       }
     };
+    const fetchEvents = async () => {
+      const { data, error } = await supabase
+        .from("order_events")
+        .select("*")
+        .eq("order_id", selectedOrder.id)
+        .order("created_at", { ascending: false });
 
+      if (!error && data) {
+        setEvents(data);
+      }
+    };
     fetchNotes();
+    fetchEvents();
   }, [selectedOrder]);
 
   return (
@@ -58,7 +147,7 @@ export default function SidePanel({ selectedOrder, onClose }: Props) {
         <div className="p-4 border-b border-slate-700 flex justify-between items-center">
           <div>
             <div className="text-sm font-semibold text-white">
-              Order #{selectedOrder.id}
+              Order BOTTOM TEST #{selectedOrder.id}
             </div>
 
             <div className="text-xs text-slate-400">
@@ -88,7 +177,7 @@ export default function SidePanel({ selectedOrder, onClose }: Props) {
           <div className="p-4 border-b border-slate-700 space-y-3 bg-slate-900">
             {/* Order ID */}
             <div className="text-sm font-semibold text-white">
-              Order #{selectedOrder.id}
+              Order TOP TEST #{selectedOrder.id}
             </div>
 
             {/* Order Date */}
@@ -132,10 +221,59 @@ export default function SidePanel({ selectedOrder, onClose }: Props) {
             {/* Status */}
             <div>
               <div className="text-slate-400 text-xs">Status</div>
-              <div>{selectedOrder.status}</div>
+              <div
+                className={`font-semibold ${
+                  orderSLA === "problem" ? "text-red-500" : "text-green-400"
+                }`}
+              >
+                {selectedOrder.status}
+              </div>
             </div>
           </div>
+          {/* EVENTS TIMELINE */}
+          <div className="p-4 border-b border-slate-700 space-y-2">
+            <div className="text-xs text-slate-400">Activity</div>
 
+            {events.length === 0 ? (
+              <div className="text-xs text-slate-500">No activity yet</div>
+            ) : (
+              events.map((event, i) => {
+                const nextEvent = events[i + 1];
+                const duration = getDuration(event, nextEvent);
+                const sla = getSLALevel(duration);
+
+                return (
+                  <div key={i} className="text-xs text-slate-300 space-y-1">
+                    <div className="flex justify-between text-slate-500">
+                      <span>{event.actor_id || "system"}</span>
+
+                      <span className="flex gap-2 items-center">
+                        {new Date(event.created_at).toLocaleString("en-GB", {
+                          timeZone: "Europe/London",
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: false,
+                        })}
+
+                        {duration && (
+                          <span className={`text-[11px] ${getSLAColor(sla)}`}>
+                            {duration}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
+                    {/* 👇 THIS is where your description goes */}
+                    <div>{event.event_description}</div>
+                  </div>
+                );
+              })
+            )}
+          </div>
           {/* NOTES SECTION */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             <div className="flex items-center justify-between mb-2">

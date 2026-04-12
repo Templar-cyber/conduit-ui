@@ -47,24 +47,43 @@ export default function SummaryBar({ items = [] }) {
   const delayed = 0;
 
   return (
-    <div className="mb-6 grid grid-cols-4 w-fit border border-slate-700/60 text-sm">
-      <div className="border-r border-slate-700/60 px-4 py-3">
-        New Orders:{" "}
-        <span className="font-semibold text-white">{newOrders}</span>
+    <div className="flex gap-12 pl-5 pr-4 mb-6 border-b border-slate-700/40 pb-4">
+      {/* NEW ORDERS */}
+      <div className="flex flex-col min-w-[90px]">
+        <span className="text-[18px] font-semibold text-white">
+          {newOrders}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+          New Orders
+        </span>
       </div>
 
-      <div className="border-r border-slate-700/60 px-4 py-3">
-        In Production:{" "}
-        <span className="font-semibold text-white">{inProduction}</span>
+      {/* IN PRODUCTION */}
+      <div className="flex flex-col min-w-[90px]">
+        <span className="text-[18px] font-semibold text-white">
+          {inProduction}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+          In Production
+        </span>
       </div>
 
-      <div className="border-r border-slate-700/60 px-4 py-3">
-        Ready to Ship:{" "}
-        <span className="font-semibold text-white">{readyToShip}</span>
+      {/* READY TO SHIP */}
+      <div className="flex flex-col min-w-[90px]">
+        <span className="text-[18px] font-semibold text-white">
+          {readyToShip}
+        </span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+          Ready to Ship
+        </span>
       </div>
 
-      <div className="px-4 py-3">
-        Delayed: <span className="font-semibold text-white">{delayed}</span>
+      {/* DELAYED */}
+      <div className="flex flex-col min-w-[90px]">
+        <span className="text-[18px] font-semibold text-white">{delayed}</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+          Delayed
+        </span>
       </div>
     </div>
   );
