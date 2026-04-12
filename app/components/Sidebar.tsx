@@ -27,10 +27,10 @@ function MenuItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
+      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-200 focus:outline-none focus:ring-0 ${
         isActive
-          ? "bg-slate-800 text-white"
-          : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+          ? "bg-slate-700/40 text-white backdrop-blur-sm"
+          : "text-slate-400 hover:text-white hover:bg-slate-800/40"
       }`}
     >
       {icon}
