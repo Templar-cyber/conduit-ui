@@ -27,10 +27,10 @@ function MenuItem({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-200 focus:outline-none focus:ring-0 ${
+      className={`flex items-center gap-2.5 rounded-md px-3 py-2.5 text-[13px] font-medium tracking-tight transition-colors duration-200 border border-transparent focus:outline-none focus:ring-0 ${
         isActive
-          ? "bg-slate-700/40 text-white backdrop-blur-sm"
-          : "text-slate-400 hover:text-white hover:bg-slate-800/40"
+          ? "bg-slate-800 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+          : "text-slate-300 hover:text-white hover:bg-slate-800/50"
       }`}
     >
       {icon}
@@ -49,33 +49,43 @@ export default function Sidebar() {
       <nav className="px-4 py-5 space-y-2">
         <MenuItem
           href="/"
-          icon={<LayoutDashboard size={18} />}
+          icon={<LayoutDashboard size={16} strokeWidth={2.2} />}
           label="Dashboard"
         />
+
         <MenuItem
           href="/workflow"
-          icon={<Workflow size={18} />}
+          icon={<Workflow size={16} strokeWidth={2.2} />}
           label="Workflow"
         />
-        <MenuItem href="/products" icon={<Box size={18} />} label="Products" />
+
+        <MenuItem
+          href="/products"
+          icon={<Box size={16} strokeWidth={2.2} />}
+          label="Products"
+        />
+
         <MenuItem
           href="/suppliers"
-          icon={<Truck size={18} />}
+          icon={<Truck size={16} strokeWidth={2.2} />}
           label="Suppliers"
         />
+
         <MenuItem
           href="/inventory"
-          icon={<Boxes size={18} />}
+          icon={<Boxes size={16} strokeWidth={2.2} />}
           label="Inventory"
         />
+
         <MenuItem
           href="/analytics"
-          icon={<BarChart3 size={18} />}
+          icon={<BarChart3 size={16} strokeWidth={2.2} />}
           label="Analytics"
         />
+
         <MenuItem
           href="/settings"
-          icon={<Settings size={18} />}
+          icon={<Settings size={16} strokeWidth={2.2} />}
           label="Settings"
         />
       </nav>
