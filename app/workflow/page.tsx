@@ -98,14 +98,25 @@ size
     // update UI immediately
     setItems((prev) =>
       prev.map((item) =>
-        item.id.toString() === itemId ? { ...item, status: newStatus } : item,
+        item.id.toString() === itemId
+          ? {
+              ...item,
+              status: newStatus,
+              orders: {
+                ...item.orders,
+                updated_at: new Date().toISOString(),
+              },
+            }
+          : item,
       ),
     );
-
     // then update database
     await supabase
       .from("orders")
-      .update({ order_status: newStatus })
+      .update({
+        order_status: newStatus,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", Number(itemId));
 
     console.log("STEP 1 - before insert");
@@ -129,7 +140,7 @@ size
       console.error("EVENT ERROR:", error);
     }
 
-    loadOrders();
+    //loadOrders();
   }
 
   async function openOrder(orderId: number | string) {
@@ -262,7 +273,9 @@ size
                           {/* 🔴🟠🟢 HEADER STRIP (DRAG HANDLE ONLY) */}
                           <div
                             {...provided.dragHandleProps}
-                            className={`px-3 py-1 text-xs text-slate-200 font-medium cursor-grab ${getStatusColour(item.orders?.updated_at)}`}
+                            className={`px-3 py-1 text-xs text-slate-200 font-medium cursor-grab ${getStatusColour(
+                              item.orders?.updated_at,
+                            )}`}
                           >
                             Order #{item.id}
                           </div>
