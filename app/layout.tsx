@@ -56,10 +56,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen text-white antialiased bg-transparent`}
       >
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1">{children}</main>
-        </div>
+        {children}
       </body>
     </html>
   );
