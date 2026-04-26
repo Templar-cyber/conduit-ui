@@ -23,7 +23,7 @@ export default function SummaryBar({ items = [] }) {
     grouped[s] = [];
   });
 
-  if (!items || items.length === 0) return null;
+  // If no items, just show zero counts
   items.forEach((item) => {
     console.log("ITEM SAMPLE:", item);
 

@@ -2,16 +2,39 @@
 
 import { Truck, Package, BarChart3 } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [step, setStep] = useState<"email" | "password">("email");
+  const [mode, setMode] = useState<"login" | "reset">("login");
+  const [email, setEmail] = useState(" ");
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
+      console.error("Google login error:", error.message);
+    }
+  };
+  const handlePasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:3000/reset-password",
+    });
+
+    if (error) {
+      console.error("Reset error:", error.message);
+    } else {
+      setMode("sent"); // show confirmation UI
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
-      {/* LEFT SIDE (FORM) */}
-      <div className="w-1/2 bg-[#f9fafb] text-black flex flex-col justify-center px-20">
-        <div className="max-w-md">
-          {/* Logo */}
-          <div className="mt-6 -ml-2 mb-10 flex items-center">
+      <div className="w-1/2 bg-[#f9fafb] text-black flex flex-col justify-center px-16">
+        <div className="max-w-md w-full">
+          {/* LOGO */}
+          <div className="mb-6 flex items-center">
             <img
               src="/CONDUIT_logo_on_white.jpeg"
               alt="CONDUIT"
@@ -19,67 +42,104 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Heading */}
-          <h2 className="text-2xl font-semibold mb-3">Welcome back</h2>
+          {/* STATIC BLOCK */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-2">Welcome back</h2>
 
-          <p className="text-gray-500 mb-8 leading-relaxed">
-            Sign in to access your CONDUIT workflow and manage your operations.
-          </p>
+            <p className="text-gray-500 mb-6 leading-relaxed">
+              Sign in to access your CONDUIT workflow and manage your
+              operations.
+            </p>
 
-          {/* Google Button */}
-          <button className="w-full border border-gray-300 rounded-lg p-3 mb-5 flex items-center justify-center gap-3 hover:bg-gray-50 transition">
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              className="w-5 h-5"
-            />
-            <span className="text-sm font-medium">Continue with Google</span>
-          </button>
+            {/* GOOGLE BUTTON */}
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full border border-gray-300 rounded-lg p-3 mb-4 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
+            >
+              <img
+                src="https://www.svgrepo.com/show/475656/google-color.svg"
+                className="w-5 h-5"
+                alt="Google"
+              />
+              Continue with Google
+            </button>
 
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="px-4 text-sm text-gray-400">Or</span>
-            <div className="flex-1 h-px bg-gray-300" />
+            {/* OR DIVIDER */}
+            <div className="flex items-center my-4">
+              <div className="flex-1 h-px bg-gray-300" />
+              <span className="px-3 text-sm text-gray-400">Or</span>
+              <div className="flex-1 h-px bg-gray-300" />
+            </div>
           </div>
 
-          {/* Email / Password Flow */}
+          {/* ========================= */}
+          {/* DYNAMIC BLOCK */}
+          {/* ========================= */}
 
-          <input
-            type="email"
-            placeholder="name@company.com"
-            className="w-full border border-gray-300 rounded-lg p-3 mb-5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          {step === "password" && (
+          <div className="space-y-4">
+            {/* EMAIL (ALWAYS VISIBLE) */}
             <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full border border-gray-300 rounded-lg p-3 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              value={email || ""}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@company.com"
+              className="w-full border border-gray-300 rounded-lg p-3"
             />
-          )}
 
-          <button
-            onClick={() => {
-              if (step === "email") {
-                setStep("password");
-              } else {
-                console.log("Login attempt");
-              }
-            }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-medium transition"
-          >
-            {step === "email" ? "Continue" : "Log in"}
-          </button>
+            {/* CONTINUE BUTTON (STEP CONTROL) */}
+            {step === "email" && (
+              <button
+                onClick={() => setStep("password")}
+                className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800"
+              >
+                Continue
+              </button>
+            )}
 
-          {step === "password" && (
-            <p className="text-sm text-blue-600 mt-3 cursor-pointer">
-              Forgot password?
-            </p>
-          )}
+            {/* PASSWORD STEP */}
+            {step === "password" && (
+              <>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className="w-full border border-gray-300 rounded-lg p-3"
+                />
 
-          {/* Footer */}
-          <p className="text-xs text-gray-400 mt-6 text-center">
+                <button className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800">
+                  Log in
+                </button>
+
+                <button
+                  onClick={() => setMode("reset")}
+                  className="text-sm text-blue-600 text-left transition hover:text-blue-800 underline-offset-2 hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </>
+            )}
+
+            {/* RESET MODE */}
+            {mode === "reset" && (
+              <>
+                <button className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800">
+                  Send reset link
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMode("login");
+                    setStep("email");
+                  }}
+                  className="text-sm text-gray-500 text-left"
+                >
+                  Back to login
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* FOOTER */}
+          <p className="text-xs text-gray-400 mt-5">
             By proceeding, you agree to the Terms of Service and Privacy Policy
           </p>
         </div>
@@ -142,7 +202,7 @@ export default function LoginPage() {
 
         {/* Content */}
         <div className="relative text-center max-w-lg px-10">
-          <h1 className="text-3xl font-semibold mb-5 tracking-tight leading-snug">
+          <h1 className="text-1xl font-semibold mb-5 tracking-tight leading-snug">
             CONDUIT Fulfilment System
           </h1>
 
