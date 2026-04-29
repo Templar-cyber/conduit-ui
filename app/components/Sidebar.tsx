@@ -11,7 +11,11 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
-
+import { supabase } from "@/lib/supabase";
+const handleLogout = async () => {
+  await supabase.auth.signOut();
+  window.location.href = "/login";
+};
 function MenuItem({
   href,
   icon,
@@ -88,6 +92,14 @@ export default function Sidebar() {
           icon={<Settings size={16} strokeWidth={2.2} />}
           label="Settings"
         />
+        <div className="mt-auto p-4">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 rounded-md transition-colors hover:bg-slate-800 hover:text-white"
+          >
+            Log out
+          </button>
+        </div>
       </nav>
     </aside>
   );

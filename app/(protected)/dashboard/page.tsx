@@ -20,6 +20,12 @@ export default function DashboardPage() {
 
     fetchOrders();
   }, []);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+
+    // force redirect back to login
+    window.location.href = "/login";
+  };
 
   return (
     <div className="p-6">

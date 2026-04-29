@@ -3,150 +3,140 @@
 import { Truck, Package, BarChart3 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Turnstile from "react-turnstile";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [step, setStep] = useState<"email" | "password">("email");
-  const [mode, setMode] = useState<"login" | "reset">("login");
-  const [email, setEmail] = useState(" ");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const router = useRouter();
+
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
     });
 
-    if (error) {
-      console.error("Google login error:", error.message);
-    }
+    if (error) console.error(error.message);
   };
-  const handlePasswordReset = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:3000/reset-password",
+  const handleLogin = async () => {
+    setErrorMessage("");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (error) {
-      console.error("Reset error:", error.message);
-    } else {
-      setMode("sent"); // show confirmation UI
-    }
-  };
+    console.log("LOGIN RESULT:", data, error);
 
+    if (error) {
+      alert("ERROR: " + error.message);
+      return;
+    }
+
+    // send user to dashboard
+    window.location.href = "/dashboard";
+  };
   return (
     <div className="min-h-screen flex">
-      <div className="w-1/2 bg-[#f9fafb] text-black flex flex-col justify-center px-16">
+      {/* LEFT */}
+      <div className="w-1/2 bg-[#f9fafb] flex items-center justify-center px-16 relative z-10">
         <div className="max-w-md w-full">
           {/* LOGO */}
-          <div className="mb-6 flex items-center">
+          <img src="/CONDUIT_logo_on_white.jpeg" className="h-60 mb-6" />
+
+          <h2 className="text-2xl font-semibold mb-1 text-gray-700">
+            Welcome back
+          </h2>
+          <p className="text-1xl font-semibold mb-4 text-gray-700">
+            Sign in to access your CONDUIT workflow
+          </p>
+
+          {/* GOOGLE */}
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full border border-gray-300 rounded-lg p-3 mb-4 flex items-center justify-center gap-2
+bg-white text-gray-700 cursor-pointer transition-all duration-200
+hover:bg-gray-50 hover:shadow-md hover:-translate-y-[1px]
+active:scale-[0.98]"
+          >
             <img
-              src="/CONDUIT_logo_on_white.jpeg"
-              alt="CONDUIT"
-              className="h-60 w-auto"
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              className="w-5 h-5"
             />
+            Continue with Google
+          </button>
+
+          {/* OR */}
+          <div className="flex items-center my-4">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="px-3 text-sm text-gray-400">Or</span>
+            <div className="flex-1 h-px bg-gray-300" />
           </div>
 
-          {/* STATIC BLOCK */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-2">Welcome back</h2>
+          {/* EMAIL */}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@company.com"
+            className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-400"
+          />
 
-            <p className="text-gray-500 mb-6 leading-relaxed">
-              Sign in to access your CONDUIT workflow and manage your
-              operations.
-            </p>
+          {/* PASSWORD */}
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            className="w-full border border-gray-300 rounded-lg p-3 mb-4 text-gray-900 placeholder:text-gray-400"
+          />
 
-            {/* GOOGLE BUTTON */}
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full border border-gray-300 rounded-lg p-3 mb-4 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                className="w-5 h-5"
-                alt="Google"
-              />
-              Continue with Google
-            </button>
-
-            {/* OR DIVIDER */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-gray-300" />
-              <span className="px-3 text-sm text-gray-400">Or</span>
-              <div className="flex-1 h-px bg-gray-300" />
+          {/* LOGIN */}
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 mb-3">
+              {errorMessage}
             </div>
-          </div>
-
-          {/* ========================= */}
-          {/* DYNAMIC BLOCK */}
-          {/* ========================= */}
-
-          <div className="space-y-4">
-            {/* EMAIL (ALWAYS VISIBLE) */}
-            <input
-              type="email"
-              value={email || ""}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@company.com"
-              className="w-full border border-gray-300 rounded-lg p-3"
-            />
-
-            {/* CONTINUE BUTTON (STEP CONTROL) */}
-            {step === "email" && (
-              <button
-                onClick={() => setStep("password")}
-                className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800"
-              >
-                Continue
-              </button>
-            )}
-
-            {/* PASSWORD STEP */}
-            {step === "password" && (
-              <>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  className="w-full border border-gray-300 rounded-lg p-3"
-                />
-
-                <button className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800">
-                  Log in
-                </button>
-
-                <button
-                  onClick={() => setMode("reset")}
-                  className="text-sm text-blue-600 text-left transition hover:text-blue-800 underline-offset-2 hover:underline"
-                >
-                  Forgot password?
-                </button>
-              </>
-            )}
-
-            {/* RESET MODE */}
-            {mode === "reset" && (
-              <>
-                <button className="w-full bg-blue-600 text-white rounded-lg p-3 transition hover:bg-blue-700 active:bg-blue-800">
-                  Send reset link
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMode("login");
-                    setStep("email");
-                  }}
-                  className="text-sm text-gray-500 text-left"
-                >
-                  Back to login
-                </button>
-              </>
-            )}
-          </div>
+          )}
+          {failedAttempts >= 5 && (
+            <div className="mt-2 mb-3">
+              <Turnstile
+                sitekey="0x4AAAAAADEbApCEXtV9oT31"
+                onVerify={(token) => setCaptchaToken(token)}
+              />
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              console.log("CLICK FIRED");
+              handleLogin();
+            }}
+            className="w-full bg-blue-600 text-white rounded-lg p-3 mb-4 cursor-pointer 
+            transition hover:bg-blue-700 active:bg-blue-800
+            disabled:opacity-50 disabled:cursor-not-allowed disabled;hover:bg-blue-600"
+          >
+            Log in
+          </button>
 
           {/* FOOTER */}
-          <p className="text-xs text-gray-400 mt-5">
-            By proceeding, you agree to the Terms of Service and Privacy Policy
-          </p>
+          <button
+            onClick={() => router.push("/forgot-password")}
+            className="text-sm text-blue-600 text-left cursor-pointer hover:underline"
+          >
+            Forgot password?
+          </button>
         </div>
       </div>
 
       {/* RIGHT SIDE (VISUAL) */}
-      <div className="w-1/2 relative flex items-center justify-center text-white overflow-hidden">
+      <div
+        className="w-1/2 relative flex items-center justify-center text-white 
+      overflow-hidden pointer-events-none z-0"
+      >
         {/* Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-700 via-indigo-600 to-cyan-400" />
 

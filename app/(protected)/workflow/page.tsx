@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { supabase } from "../../lib/supabase";
-import SidePanel from "../components/SidePanel";
-import { OrderItem } from "../types";
-import SummaryBar from "../components/SummaryBar";
+import { supabase } from "../../../lib/supabase";
+import SidePanel from "../../components/SidePanel";
+import { OrderItem } from "../../types";
+import SummaryBar from "../../components/SummaryBar";
 
 function getStatusColour(updatedAt: string) {
   if (!updatedAt) return "bg-emerald-500/40";
