@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
   const router = useRouter();
 
   const handleGoogleLogin = async () => {
@@ -32,7 +33,10 @@ export default function LoginPage() {
     console.log("LOGIN RESULT:", data, error);
 
     if (error) {
-      alert("ERROR: " + error.message);
+      setErrorMessage("Incorrect details, please try again");
+
+      setFailedAttempts((prev) => prev + 1);
+
       return;
     }
 
@@ -95,11 +99,7 @@ active:scale-[0.98]"
           />
 
           {/* LOGIN */}
-          {errorMessage && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-md mt-2 mb-3">
-              {errorMessage}
-            </div>
-          )}
+
           {failedAttempts >= 5 && (
             <div className="mt-2 mb-3">
               <Turnstile
@@ -107,6 +107,9 @@ active:scale-[0.98]"
                 onVerify={(token) => setCaptchaToken(token)}
               />
             </div>
+          )}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-3">{errorMessage}</p>
           )}
           <button
             type="button"
