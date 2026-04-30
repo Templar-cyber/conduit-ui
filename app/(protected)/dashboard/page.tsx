@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from "react";
 import SummaryBar from "@/app/components/SummaryBar";
-import { supabase } from "@/lib/supabase";
+import { createBrowserClient } from "@supabase/ssr";
 
 export default function DashboardPage() {
   const [items, setItems] = useState<any[]>([]);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -26,6 +31,29 @@ export default function DashboardPage() {
     // force redirect back to login
     window.location.href = "/login";
   };
+
+  useEffect(() => {
+    const run = async () => {
+      // Wait for session to stabilise
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      console.log("LOOKING FOR ID:", user.id);
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      console.log("PROFILE:", profile, error);
+    };
+
+    run();
+  }, []);
 
   return (
     <div className="p-6">
