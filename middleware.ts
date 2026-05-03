@@ -3,6 +3,9 @@ import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  console.log("PATH:", pathname);
   const res = NextResponse.next();
 
   const supabase = createServerClient(
@@ -25,36 +28,21 @@ export async function middleware(req: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user && !req.nextUrl.pathname.startsWith("/login")) {
-    return NextResponse.redirect(new URL("/login", req.url));
+
+  if (!user) {
+    const pathname = req.nextUrl.pathname;
+
+    const publicRoutes = ["/login", "/forgot-password"];
+    const isPublic = publicRoutes.includes(pathname);
+
+    if (!isPublic) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    return NextResponse.next(); // 👈 THIS is the key line
   }
-  console.log("FULL USER OBJECT:", user);
-  console.log("USER ID:", user?.id);
-  console.log("USER EMAIL:", user?.email);
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("role, supplier_id")
-    .eq("id", user.id)
-    .single();
-
-  console.log("MIDDLEWARE PROFILE:", profile);
-
-  if (!profile) {
-    console.log("NO PROFILE FOUND");
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  console.log("USER ROLE:", profile.role);
-
-  const pathname = req.nextUrl.pathname;
 
   // Admin routes
-  if (pathname.startsWith("/dashboard")) {
-    if (profile.role !== "admin") {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
-  }
 
   // Supplier routes (future-proof)
   if (pathname.startsWith("/supplier")) {
@@ -84,6 +72,11 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(route),
   );
 
+  // 🚨 Allow portal routes (public supplier portal)
+  if (pathname.startsWith("/portal")) {
+    return NextResponse.next();
+  }
+
   // 🚫 Block access if not logged in
   if (isProtected && !user) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -98,5 +91,13 @@ export async function middleware(req: NextRequest) {
 
 // 🎯 Apply middleware to all routes except static files
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    "/workflow",
+    "/dashboard",
+    "/products",
+    "/suppliers",
+    "/inventory",
+    "/analytics",
+    "/settings",
+  ],
 };

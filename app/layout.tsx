@@ -13,6 +13,12 @@ import {
 
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { Sora } from "next/font/google";
+
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["300", "400", "600"],
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -52,9 +58,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-slate-950" suppressHydrationWarning>
+    <html lang="en" className="light">
       <body
-        className={`${inter.className} min-h-screen text-white antialiased bg-transparent`}
+        className={`${inter.className} ${sora.className} min-h-screen text-white antialiased`}
       >
         {children}
       </body>
