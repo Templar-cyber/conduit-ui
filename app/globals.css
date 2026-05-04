@@ -39,3 +39,12 @@
     transform: translateY(0px) translateX(0px);
   }
 }
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #111827 !important; /* gray-900 */
+  transition: background-color 9999s ease-in-out 0s;
+  font-size: 14px !important;
+}
