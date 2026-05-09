@@ -1,5 +1,8 @@
 "use client";
 import { Outfit } from "next/font/google";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -7,10 +10,43 @@ const outfit = Outfit({
 });
 
 export default function PortalMenuPage() {
+  const router = useRouter();
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        router.push("/portal-login");
+      }
+    };
+
+    checkUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/portal-login");
+  };
+  const menuItems = [
+    { label: "Latest Orders", route: "/portal/orders" },
+    { label: "Order History", route: "/portal/history" },
+    { label: "Available Stock (CSV)", route: "/portal/stock" },
+    { label: "Print Files", route: "/portal/prints" },
+    { label: "Update Shipping", route: "/portal/shipping" },
+    { label: "Report Issue", route: "/portal/issues" },
+  ];
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative">
       {/* LEFT SIDE */}
-      <div className="w-1/2 bg-white flex items-center justify-center">
+      <div className="w-1/2 bg-white flex items-center justify-center relative">
+        <button
+          onClick={handleLogout}
+          className="absolute top-6 right-6 text-base font-medium text-gray-700 hover:text-red-600 transition cursor-pointer px-3 py-1 rounded-md hover:bg-red-50"
+        >
+          Log out
+        </button>
+
         <div className="w-[420px] space-y-8">
           {/* LOGO */}
           <div className="flex justify-center">
@@ -29,19 +65,13 @@ export default function PortalMenuPage() {
 
           {/* MENU */}
           <div className="space-y-4">
-            {[
-              "Latest Orders",
-              "Order History",
-              "Available Stock (CSV)",
-              "Print Files",
-              "Update Shipping",
-              "Report Issue",
-            ].map((item) => (
+            {menuItems.map((item) => (
               <div
-                key={item}
-                className="p-4 rounded-lg cursor-pointer text-black font-medium bg-[#F5E6C8] hover:bg-[#E6D3A3] transition"
+                key={item.label}
+                onClick={() => router.push(item.route)}
+                className="p-4 rounded-lg cursor-pointer text-black font-medium bg-yellow-100 hover:bg-yellow-200 transition"
               >
-                {item}
+                {item.label}
               </div>
             ))}
           </div>

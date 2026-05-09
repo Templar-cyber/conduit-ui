@@ -1,6 +1,74 @@
 "use client";
 
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
 export default function PortalLoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function getUserRole(userId: string) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("ROLE FETCH ERROR:", error);
+      return null;
+    }
+
+    return data?.role;
+  }
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    console.log("START LOGIN");
+
+    const { data, error: signInError } = await supabase.auth.signInWithPassword(
+      {
+        email,
+        password,
+      },
+    );
+
+    console.log("RESPONSE:", { data, error });
+    console.log("AFTER SIGN IN");
+
+    if (signInError) {
+      console.log("SIGN IN ERROR:", signInError.message);
+      setError(signInError.message);
+      setLoading(false);
+      return;
+    }
+
+    // success
+    const role = data?.user ? await getUserRole(data.user.id) : null;
+
+    if (role === "admin") {
+      router.push("/dashboard");
+    } else if (role === "supplier") {
+      router.push("/portal/menu");
+    } else {
+      router.push("/login");
+    }
+
+    setLoading(false); // important
+
+    router.push("/portal/menu");
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* LEFT SIDE */}
@@ -31,7 +99,9 @@ export default function PortalLoginPage() {
               <input
                 type="email"
                 placeholder="you@company.com"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 bg-white cursor-pointertransition-all duration-200 hover:border-purple-400 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 bg-white transition-all duration-200 hover:border-purple-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
 
@@ -41,13 +111,26 @@ export default function PortalLoginPage() {
               <input
                 type="password"
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 bg-white cursor-pointer transition-all duration-200 hover:border-purple-400 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 bg-white transition-all duration-200 hover:border-purple-500 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
             </div>
-
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
             {/* BUTTON */}
-            <button className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium cursor-pointer transition-all duration-200 hover:from-purple-600 hover:to-blue-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]">
-              Sign in
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={loading}
+              className={`w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium cursor-pointer transition-all duration-200 ${
+                loading
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:from-purple-600 hover:to-blue-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+              }`}
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
 

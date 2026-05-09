@@ -1,8 +1,6 @@
 import PortalCard from "@/app/components/PortalCard";
-import { useRouter } from "next/navigation";
 
 export default function PortalPage() {
-  const router = useRouter();
   return (
     <div className="p-8 bg-[#F7F9FC] min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Supplier Portal</h1>
